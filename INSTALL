@@ -1,0 +1,5 @@
+INSTALLATION
+
+- Create a folder (or dump into root) the contents of the project.
+- Set permissions on root directory to allow reading and writing (chmod 766)
+- Point your browser to the admin directory and configure a username and password for admin control

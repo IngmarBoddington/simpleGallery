@@ -10,8 +10,8 @@ foreach(glob("images/*") as $filename) {
 sort($galleryArray);
 
 
-
-$page_request = strip_tags($_SERVER['REQUEST_URI']); //strips any html
+$installDirectory = str_ireplace('index.php', '', $_SERVER['SCRIPT_NAME']);
+$page_request = str_ireplace($installDirectory, '', strip_tags($_SERVER['REQUEST_URI'])); //strips any html
 
 //checks for any "../" in the request and strips out. This prevents unwanted directory navigation
 while(stripos($page_request, '../') !== false) {
@@ -24,13 +24,50 @@ $page_request = $page_request[0]; //grabs just the first bit
 
 
 $imageArray = array();
-foreach(glob("images/".$page_request."/*_200.jpg") as $filename) {
-	$imageArray[] = str_ireplace("_200.jpg",".jpg",$filename);
+foreach(glob("images/".$page_request."/200/*") as $filename) {
+	$imageArray[] = $filename;
 }
 
+echo '<!DOCTYPE html> 
+<html> 
+	<head> 
+	<title>default</title>
+	<meta charset="utf-8" />
+	<meta name="keywords" content="default" />
+	<meta name="description" content="default" />
+	<meta name="robots" content="index,follow" />
+	<link rel="stylesheet" type="text/css" href="' . $installDirectory . 'styles.css" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 
-echo '<pre>'; print_r($galleryArray); echo '</pre>';
+	</head> 
+ 
+<body>
+<nav role="navigation">
+	<ul>
+		<li><a href="' . $installDirectory . '">Home</a></li>';
 
-echo '<hr />';
+foreach($galleryArray as $gallery) {
+	echo '<li><a href="' . $installDirectory . str_ireplace('images/','', $gallery) . '">' . str_ireplace('images/','', $gallery) . '</a></li>' . PHP_EOL;
+}
 
-echo '<pre>'; print_r($imageArray); echo '</pre>';
+$images = '';
+foreach($imageArray as $image) {
+	$images .= '<div class="imgBox"><img src="' . $image . '" /></div>' . PHP_EOL;
+}
+
+echo '
+	<ul>
+</nav>
+
+<article>
+	<header>
+		<h2>Simple Gallery</h2>	
+	</header>
+	
+	<p>Pick an option from the menu on the left to use the gallery.</p>
+	 ' . $images . '
+</article>';
+
+
+echo '</body>
+</html>';
