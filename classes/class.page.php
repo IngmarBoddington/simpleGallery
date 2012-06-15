@@ -10,9 +10,9 @@
 class page {
 	//base default values...
 	public $template 				= 'template/index.php';
-	public $title 					= 'Simple Photo Gallery Admin';
+	public $title 					= 'Simple Photo Gallery';
 	public $description				= 'A really simply photo gallery site by http://ba.rrypark.in';
-	public $header					= '<h1>Simple Photo Gallery Admin</h1>';
+	public $header					= '<h1>Simple Photo Gallery</h1>';
 	public $navigation				= '';
 	public $content					= '';
 	public $footer					= 'Functionality by: <a href="http://ba.rrypark.in">Barry Parkin</a>';

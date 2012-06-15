@@ -1,43 +1,6 @@
 <?php
 
 
-function generateThumbNails($filename, $desiredThumbNailWidth) {
-	//check file is actually an image by making sure getimagesize returns an array
-	$imageSizeArray = @getimagesize($filename);
-	if(is_array($imageSizeArray)) {
-		// parse path for the extension
-		$fileInfo = pathinfo($filename);
-
-		//check the file type
-		if(strtolower($fileInfo['extension']) == 'jpg' ) {
-			//GD includes several "imagecreatefrom..." functions for several image types, so use the appropriate function for your image type
-			$img = imagecreatefromjpeg($filename);
-			list($width, $height) = $imageSizeArray;
-
-			// calculate thumbnail size
-			$new_width = $desiredThumbNailWidth;
-			$new_height = floor( $height * ( $desiredThumbNailWidth / $width ) );
-
-			// create a new temporary image
-			$tmp_img = imagecreatetruecolor( $new_width, $new_height );
-
-			// copy and resize old image into new image
-			imagecopyresampled( $tmp_img, $img, 0, 0, 0, 0, $new_width, $new_height, $width, $height );
-
-			// save thumbnail into a file
-			$thumbFilename = $fileInfo['dirname'] . '/' . $desiredThumbNailWidth . '/' . $fileInfo['filename'] . '.' . $fileInfo['extension'];
-			if(imagejpeg( $tmp_img, $thumbFilename, 80 )) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-		//insert here copy/pastes of the above for each other image type you want to handle (gif/png/etc...)
-	}
-}
-
-
-
 //this is the target folder for uploading to
 $galleryTarget = $_SERVER['HTTP_GALLERY'];
 
@@ -82,7 +45,7 @@ if(isset($_SERVER['HTTP_X_FILE_NAME'])) {
 
 	//check that there isn't a file already in existence with that name...
 	if(is_file($uploadFileName)) {
-		$_SESSION['uploaderStatus'] .=  'Error: a file with that name ('.$uploadFileName.') already exists. Upload aborted.';
+		$_SESSION['uploaderStatus'] .=  '<p class="error">Error: a file with that name ('.$uploadFileName.') already exists. Upload aborted.</p>';
 	} else {
 		//save the content of the input stream...
 		file_put_contents($uploadFileName,file_get_contents('php://input'));
@@ -104,33 +67,33 @@ if(isset($_SERVER['HTTP_X_FILE_NAME'])) {
 			}
 			//recheck if directory exists - maybe a bit redundant, but functional and catches both doesn't exist and failed to create
 			if(!is_dir($uploadDirectory)) {
-				$_SESSION['uploaderStatus'] .=  'Error: upload directory does not exist and could not be created.';
+				$_SESSION['uploaderStatus'] .=  '<p class="error">Error: upload directory does not exist and could not be created.</p>';
 				unlink($uploadFileName); //delete posted file
 			} else {
 				//directory exists, check if it's writ[b]e[/b]able. - stupid php
 				if(!is_writable($uploadDirectory)) {
-					$_SESSION['uploaderStatus'] .=  'Error: cannot write to upload directory. Please check permissions';
+					$_SESSION['uploaderStatus'] .=  '<p class="error">Error: cannot write to upload directory. Please check permissions</p>';
 					unlink($uploadFileName); //delete posted file
 				} else {
 					//check if the file exists already
 					if(is_file($uploadDirectory . $uploadFileName)) {
 						//file exists - move_uploaded_file overwrites existing files and this shouldn't be desired behaviour here
-						$_SESSION['uploaderStatus'] .=  'Error: a file with that name ('.$uploadFileName.') already exists. Upload aborted.';
+						$_SESSION['uploaderStatus'] .=  '<p class="error">Error: a file with that name ('.$uploadFileName.') already exists. Upload aborted.</p>';
 						unlink($uploadFileName); //delete posted file
 					} else {
 						//attempt to move file to desired location
 						if(!rename($uploadFileName, $uploadDirectory . $uploadFileName)) {
 							//file couldn't be moved
-							$_SESSION['uploaderStatus'] .=  'Error: could not move uploaded file ('.$uploadFileName.') to uploads directory';
+							$_SESSION['uploaderStatus'] .=  '<p class="error">Error: could not move uploaded file ('.$uploadFileName.') to uploads directory</p>';
 							unlink($uploadFileName); //delete posted file
 						} else {
 							//file uploaded and moved to the upload directory - yay!
-							$_SESSION['uploaderStatus'] .=  'Successfully uploaded "'.$uploadFileName.'".';
-							if(!generateThumbNails('../images/' . $galleryTarget . '/' . $uploadFileName, 200)) {
-								$_SESSION['uploaderStatus'] .=  'Could not create 200px wide thumbnailed "'.$uploadFileName.'".';
-							}
-							if(!generateThumbNails('../images/' . $galleryTarget . '/' . $uploadFileName, 800)) {
-								$_SESSION['uploaderStatus'] .=  'Could not create 800px wide thumbnailed "'.$uploadFileName.'".';
+							$_SESSION['uploaderStatus'] .=  '<p>Successfully uploaded "'.$uploadFileName.'".</p>';
+							
+							$image = New image('../images/' . $galleryTarget . '/' . $uploadFileName);
+							$image->generateThumbNails();
+							if($image->errors != 0) {
+								$_SESSION['uploaderStatus'] .=  '<p class="error">Error: Could not generate thumbnails for "'.$uploadFileName.'".</p>';
 							}
 						}
 					}
@@ -138,7 +101,7 @@ if(isset($_SERVER['HTTP_X_FILE_NAME'])) {
 			}
 		} else {
 			//file is not a valid mime type
-			$_SESSION['uploaderStatus'] .=  'Error: file ('.$uploadFileName.') is not an image';
+			$_SESSION['uploaderStatus'] .=  '<p class="error">Error: file ('.$uploadFileName.') is not an image</p>';
 			unlink($uploadFileName); //delete posted file
 		}
 	}

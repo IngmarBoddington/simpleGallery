@@ -1,8 +1,4 @@
-
-<article>
-	<header>
-		<h2>Upload - ##GALLERY##</h2>	
-	</header>
+	<h2>Upload - ##GALLERY##</h2>	
 	<p>Your are now uploading to "##GALLERY##". Drag and drop images onto the box below to upload.</p>
 	<h3>Choose file(s)</h3>
 	<div id="uploadArea">
@@ -12,8 +8,6 @@
 	</div>
 	<div id="completeList">
 	</div>
-</article>
-
 <script>
 function preventDefaultAndPropagation(evt) {
 	evt.preventDefault();
@@ -114,5 +108,3 @@ uploadArea.on("drop", function (evt) {
 	evt.preventDefault();evt.stopPropagation();
 });
 </script>
-</body>
-</html>
